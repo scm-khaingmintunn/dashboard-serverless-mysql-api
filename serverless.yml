@@ -1,0 +1,17 @@
+service: dashboard-serverless-mysql-api
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  call:
+    handler: handler.call
+    events:
+      - http:
+          path: user
+          method: post
+          cors: true

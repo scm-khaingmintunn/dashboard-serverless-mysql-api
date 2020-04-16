@@ -1,0 +1,34 @@
+{
+  "name": "serverless-mysql-api",
+  "version": "0.0.1",
+  "description": "tutorial project for serverless with mysql",
+  "main": "handler.js",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "fs": "^0.0.1-security",
+    "js-yaml": "^3.13.1",
+    "moment": "^2.24.0",
+    "mysql": "^2.18.1",
+    "prettier": "^2.0.4",
+    "serverless": "^1.67.3",
+    "serverless-offline": "^6.1.4",
+    "uuid": "^7.0.3",
+    "validator": "^13.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "migrate": "node mysql/migrations.js",
+    "db:seed": "node mysql/seeders.js",
+    "format": "prettier --write **/*.js"
+  },
+  "author": "khaingmintun",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khaingmintun/dashboard-serverless-mysql-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/khaingmintun/dashboard-serverless-mysql-api/issues"
+  },
+  "homepage": "https://github.com/khaingmintun/dashboard-serverless-mysql-api#readme"
+}
