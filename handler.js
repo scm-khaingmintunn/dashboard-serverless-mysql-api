@@ -7,14 +7,48 @@ const NoAuth = async (params) => {
   return params
 }
 
+const Authed = async (params) => {
+  const authed_user = await UserService.authenticate(params)
+  params.current_user = authed_user
+
+  return params
+}
+
+const Admin = async (params) => {
+  const admin = await UserService.adminAuthecticate(params)
+  params.current_user = admin
+
+  return params
+}
+
+const User = async (params) => {
+  const user = await UserService.userAuthecticate(params)
+  params.current_user = user
+
+  return params
+}
+
 const router = {
   '/user': {
     POST: {
-      auth: NoAuth,
+      auth: Admin,
       main: UserService.create,
     },
   },
+  '/users': {
+    GET: {
+      auth: Admin,
+      main: UserService.getAll,
+    },
+  },
+  '/login': {
+    POST: {
+      auth: NoAuth,
+      main: UserService.login,
+    },
+  },
 }
+
 module.exports.call = async (event, context) => {
   let handler = null
   try {

@@ -15,3 +15,11 @@ functions:
           path: user
           method: post
           cors: true
+      - http:
+          path: users
+          method: get
+          cors: true
+      - http:
+          path: login
+          method: post
+          cors: true

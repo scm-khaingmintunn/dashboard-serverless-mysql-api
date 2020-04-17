@@ -14,6 +14,9 @@ class UserModel extends Abstract {
     this.username = params.username
     this.email = params.email
     this.password = params.password
+    this.auth_status = params.auth_status
+    this.user_type = params.user_type
+    this.suspend_status = params.suspend_status
     this.created = params.created
     this.updated = params.updated
   }
@@ -34,14 +37,17 @@ class UserModel extends Abstract {
       username: params.username,
       email: params.email,
       password: hash_password,
+      auth_status: this.auth_status.AUTH,
+      user_type: this.user_type.NORMALUSER,
+      suspend_status: this.suspend_status.ACTIVE,
       created: moment().unix(),
       updated: null,
     }
 
     // query and db insert
     const query_str = `INSERT INTO users 
-    (user_id, username, email, password, created, updated) 
-    VALUES ('${user.user_id}', '${user.username}', '${user.email}', '${user.password}', '${user.created}', '${user.updated}')`
+    (user_id, username, email, password, auth_status, user_type, suspend_status, created, updated) 
+    VALUES ('${user.user_id}', '${user.username}', '${user.email}', '${user.password}', ${user.auth_status}, ${user.user_type}, ${user.suspend_status}, ${user.created}, ${user.updated})`
     await connection.query(query_str)
 
     return this.toModel(user)
@@ -53,6 +59,55 @@ class UserModel extends Abstract {
     const user = await connection.query(query_str)
 
     return user
+  }
+
+  static async getByUserId(user_id) {
+    const connection = await super.connection()
+    const query_str = `SELECT * FROM users WHERE user_id='${user_id}'`
+    const users = await connection.query(query_str)
+
+    if (users.length < 0) return null
+    else return this.toModel(users[0])
+  }
+
+  static async getAll() {
+    const connection = await super.connection()
+    const query_str = `SELECT * FROM users WHERE user_type!='${this.user_type.ADMIN}'`
+    let users = await connection.query(query_str)
+
+    const user_models = users.map(user => {
+      return this.toModel(user)
+    })
+
+    return user_models
+  }
+
+  static async getByLogin(params) {
+    const user = await this.getByEmail(params.email)
+    // user not found
+    if (user.length < 1) super.throwCustomError(user, 'User Not Found.', 404)
+    // auth status is 0
+    if (user[0].auth_status !== this.auth_status.AUTH)
+      super.throwCustomError(
+        this.auth_status.AUTH,
+        'User is not authenticated.',
+        401
+      )
+    // suspended by admin
+    if (user[0].suspend_status === this.suspend_status.SUSPEND)
+      super.throwCustomError(
+        this.suspend_status.SUSPEND,
+        'User is suspended by admin.',
+        422
+      )
+
+    const isMatch = await CustomUtils.comparePassword(
+      params.password,
+      user[0].password
+    )
+    if (!isMatch) super.throwCustomError(isMatch, 'Incorrect password.', 422)
+
+    return this.toModel(user[0])
   }
 
   /***************************************************************
@@ -95,15 +150,34 @@ class UserModel extends Abstract {
   static toModel(item) {
     if (!item) return null
     const user = {
-      user_id: item.user_id ? item.user_id : null,
-      username: item.username ? item.username : null,
-      email: item.email ? item.email : null,
-      created: item.created ? item.created : null,
-      updated: item.updated ? item.updated : null,
+      user_id: item.user_id !== undefined ? item.user_id : null,
+      username: item.username !== undefined ? item.username : null,
+      email: item.email !== undefined ? item.email : null,
+      auth_status: item.auth_status !== undefined ? item.auth_status : null,
+      user_type: item.user_type !== undefined ? item.user_type : null,
+      suspend_status:
+        item.suspend_status !== undefined ? item.suspend_status : null,
+      created: item.created !== undefined ? item.created : null,
+      updated: item.updated !== undefined ? item.updated : null,
     }
 
     return new UserModel(user)
   }
+}
+
+UserModel.auth_status = {
+  NOAUTH: 0,
+  AUTH: 1,
+}
+
+UserModel.user_type = {
+  ADMIN: 0,
+  NORMALUSER: 1,
+}
+
+UserModel.suspend_status = {
+  ACTIVE: 0,
+  SUSPEND: 1,
 }
 
 module.exports.UserModel = UserModel

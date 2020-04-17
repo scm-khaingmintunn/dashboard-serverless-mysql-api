@@ -36,6 +36,20 @@ class CustomUtils {
 
     return isMatch
   }
+
+  static getHeader(properName, headers) {
+    const value = headers[properName]
+      ? headers[properName]
+      : headers[properName.toLowerCase()]
+
+    return value !== undefined ? value : null
+  }
+
+  static getAccessToken(params) {
+    const authorization = this.getHeader('Authorization', params.headers)
+
+    return authorization ? authorization.replace(/^token /, '') : null
+  }
 }
 
 module.exports = CustomUtils
