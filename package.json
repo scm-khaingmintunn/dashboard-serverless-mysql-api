@@ -11,7 +11,7 @@
     "mysql": "^2.18.1",
     "prettier": "^2.0.4",
     "serverless": "^1.67.3",
-    "serverless-offline": "^6.1.4",
+    "serverless-offline": "^12.0.3",
     "uuid": "^7.0.3",
     "validator": "^13.0.0"
   },
